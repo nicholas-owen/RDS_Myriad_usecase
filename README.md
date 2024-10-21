@@ -140,7 +140,7 @@ RESULTS_DIR="$HOME/results"
 mkdir -p "$RESULTS_DIR"
 
 # Run the FASTQC command
-fastqc -Xmx4096m HBR_*.fq UHR_*.fq -o "$RESULTS_DIR"
+fastqc -Xmx4096m HBR_*.fq.gz UHR_*.fq.gz -o "$RESULTS_DIR"
 ```
 
 submit the script:
