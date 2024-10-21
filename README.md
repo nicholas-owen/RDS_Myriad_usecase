@@ -124,14 +124,15 @@ create a script file containing the following: `my_script_01.sh`
 #$ -o output.txt # output file
 #$ -e error.txt # error log file
 #$ -N Test_HPC_Job # name of the job
-#$ -l h_rt=00:10:00 # maximum runtime 
-#$ -l h_vmem=1G # memory per core
+#$ -l h_rt=00:30:00 # maximum runtime 
+#$ -l h_vmem=4G # memory per core
 #$ -pe smp 1 # number of cores , if using one this isnt needed
 
 # Unload conflicting modules
 module unload gcc-libs
 
 # Load necessary modules
+module load java/1.8.0_92
 module load fastqc/0.11.8
 
 # Create the Results directory if it doesn't exist
@@ -139,7 +140,7 @@ RESULTS_DIR="$HOME/results"
 mkdir -p "$RESULTS_DIR"
 
 # Run the FASTQC command
-fastqc HBR_*.fq UHR_*.fq -o "$RESULTS_DIR"
+fastqc -Xmx4096m HBR_*.fq UHR_*.fq -o "$RESULTS_DIR"
 ```
 
 submit the script:
