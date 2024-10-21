@@ -124,8 +124,8 @@ create a script file containing the following: `my_script_01.sh`
 #$ -o output.txt # output file
 #$ -e error.txt # error log file
 #$ -N Test_HPC_Job # name of the job
-#$ -l h_rt=01:00:00 # maximum runtime 
-#$ -l h_vmem=4G # memory per core
+#$ -l h_rt=00:10:00 # maximum runtime 
+#$ -l h_vmem=1G # memory per core
 #$ -pe smp 1 # number of cores , if using one this isnt needed
 
 # Unload conflicting modules
