@@ -244,3 +244,35 @@ fi
 ## Extras
 
 Can you write a script to use [MultiQC](https://multiqc.info/) to summarise the results of the FASTQC analysis ?
+
+## Tips
+
+from the docs: 
+
+### Virtual Python Env
+
+
+When using your own virtualenv, you want to load one of the base python modules.
+
+```
+# load a base python module (you will always need to do this)
+module load python/3.11
+# create the new virtualenv, with any name you want
+virtualenv <DIR>
+# activate it
+source <DIR>/bin/activate
+```
+
+### Interactive X sessions§
+You can get an interactive X session from the head node of the job back to the login node. The way to do this is to run the qrsh command in the following generic fashion:
+
+```
+qrsh <options> <command> <arguments to <command>>
+```
+Where <command> is either a command to launch an X terminal like Xterm or Mrxvt or a GUI application like XMGrace or GaussView.
+
+To make effective use of the X forwarding you will need to have logged in to the login node with ssh -X or some equivalent method. Here is an example of how you can get a X terminal session with the qrsh command:
+```
+qrsh -l mem=512M,h_rt=0:30:0 \
+   "/shared/ucl/apps/mrxvt/0.5.4/bin/mrxvt -title 'User Test Node'"
+```
