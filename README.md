@@ -344,10 +344,12 @@ process FASTQC {
     fastqc -q $reads1 $reads2
     """
 }
+```
 
 `nextflow.config`
 
-```// Global default params, used in configs
+```
+// Global default params, used in configs
 params {
     // Input options
     input = './sampletest.tab'
