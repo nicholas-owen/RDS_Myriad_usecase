@@ -276,3 +276,121 @@ To make effective use of the X forwarding you will need to have logged in to the
 qrsh -l mem=512M,h_rt=0:30:0 \
    "/shared/ucl/apps/mrxvt/0.5.4/bin/mrxvt -title 'User Test Node'"
 ```
+
+
+## Bonus stuff
+So instead of bash based commands, what about using workflow language commands, such as `nextflow`.
+
+`./main.nf`
+```nextflow
+#!/usr/bin/env nextflow
+
+nextflow.enable.dsl = 2
+
+// Define parameters
+params.input = '~/documents/fq_files.txt'
+params.outdir = 'results'
+
+// Define the input channel with the new mapping and add logging
+Channel
+    .fromPath(params.input)
+    .splitCsv(header: false, sep: ',')
+    .map { row -> 
+        def sample_id = row[0]
+        def reads1 = file(row[1])
+        def reads2 = file(row[2])
+
+        if (reads1 && reads2) {
+            log.info "Processing sample: ${sample_id}"
+            log.info "  Read 1: ${reads1}"
+            log.info "  Read 2: ${reads2}"
+            return tuple(sample_id, reads1, reads2)
+             } else {
+        log.error "Invalid input for sample ${sample_id}: Missing read file(s)"
+        return null
+        }
+    }
+    .set { input_samples }
+
+// Import modules
+include { FASTQC } from './modules/fastqc'
+
+// Define the main workflow
+workflow {
+    FASTQC(input_samples)
+}
+
+// Define the workflow completion handler
+workflow.onComplete {
+    log.info "Pipeline completed at: $workflow.complete"
+    log.info "Execution status: ${ workflow.success ? 'OK' : 'failed' }"
+}
+```
+
+`./modules/fastqc`
+```
+process FASTQC {
+    tag "$sample_id"
+    publishDir "${params.outdir}/fastqc", mode: 'copy'
+
+    input:
+    tuple val(sample_id), path(reads1), path(reads2)
+
+    output:
+    path "*_fastqc.{zip,html}", emit: fastqc_results
+
+    script:
+    """
+    fastqc -q $reads1 $reads2
+    """
+}
+
+`nextflow.config`
+
+```// Global default params, used in configs
+params {
+    // Input options
+    input = './sampletest.tab'
+    outdir = 'results'
+}
+
+// Process-specific resource requirements
+process {
+    withName: FASTQC {
+        cpus = 2
+        memory = '4.GB'
+    }
+}
+
+// Capture execution reports
+report {
+    enabled = true
+    file = "${params.outdir}/pipeline_report.html"
+    overwrite = true
+}
+
+// Capture execution timeline
+timeline {
+    enabled = true
+    file = "${params.outdir}/pipeline_timeline.html"
+    overwrite = true
+}
+
+// Capture task resource consumption
+trace {
+    enabled = true
+    file = "${params.outdir}/pipeline_trace.txt"
+    overwrite = true
+}
+
+```
+
+`./fq_files.txt`
+```
+UHR_1,UHR_1_R1.fq,UHR_1_R2.fq
+UHR_2,UHR_2_R1.fq,UHR_2_R2.fq
+UHR_3,UHR_3_R1.fq,UHR_3_R2.fq
+HBR_1,HBR_1_R1.fq,HBR_1_R2.fq
+HBR_2,HBR_2_R1.fq,HBR_2_R2.fq
+HBR_3,HBR_3_R1.fq,HBR_3_R2.fq
+```
